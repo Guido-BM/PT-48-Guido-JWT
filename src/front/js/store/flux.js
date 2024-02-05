@@ -1,6 +1,7 @@
 const getState = ({ getStore, getActions, setStore }) => {
 	return {
 		store: {
+			token: localStorage.getItem('token') || '',
 			message: null,
 			demo: [
 				{
@@ -46,7 +47,42 @@ const getState = ({ getStore, getActions, setStore }) => {
 
 				//reset the global store
 				setStore({ demo: demo });
-			}
+			},
+			createUser: async (email, password) => {
+				const store = getStore();
+				const response = await fetch(`${process.env.BACKEND_URL}/api/user`, {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify({ email, password })
+				});
+				const data = await response.json();
+				setStore({ ...store, token: data.token });
+				localStorage.setItem('token', data.token)
+			},
+			setToken: async (email, password) => {
+				const store = getStore();
+				const response = await fetch(`${process.env.BACKEND_URL}/api/token`, {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify({ email, password })
+				});
+				const data = await response.json();
+				setStore({ ...store, token: data.token });
+				localStorage.setItem('token', data.token)
+			},
+			updateToken: (token) => {
+				const store = getStore();
+				setStore({ ...store, token: token });
+			},
+			clearToken: () => {
+				const store = getStore();
+				setStore({ ...store, token: '' });
+				localStorage.setItem('token', '');
+			},
 		}
 	};
 };
